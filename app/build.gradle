@@ -52,6 +52,10 @@ dependencies {
     // Material Design components
     implementation 'com.google.android.material:material:1.5.0'
 
+    //ReactiveX librarie
+    implementation 'io.reactivex.rxjava3:rxjava:3.1.3'
+    implementation 'io.reactivex.rxajava3:rxandroid:3.0.0'
+
 
     // Retrofit dependencies
     def retrofitVersion = '2.9.0'
