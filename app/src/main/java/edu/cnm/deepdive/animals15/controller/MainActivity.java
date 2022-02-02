@@ -4,8 +4,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import androidx.appcompat.app.AppCompatActivity;
+import com.squareup.picasso.Picasso;
+import edu.cnm.deepdive.animals15.BuildConfig;
 import edu.cnm.deepdive.animals15.R;
 import edu.cnm.deepdive.animals15.model.Animal;
 import edu.cnm.deepdive.animals15.service.WebServiceProxy;
@@ -23,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     animalSelector = findViewById(R.id.animal_selector);
+    new RetrieverTask().execute();
 
 
   }
@@ -40,24 +44,34 @@ public class MainActivity extends AppCompatActivity {
           return response.body();
         } else {
           Log.e(getClass().getName(), response.message());
+          cancel(true);
+          return null;
         }
 
       } catch (IOException e) {
         Log.e(getClass().getName(), e.getMessage(), e);
+        cancel(true);
+        return null;
+
 
       }
-      return null;
+
 
     }
 
     @Override
     protected void onPostExecute(List<Animal> animals) {
       super.onPostExecute(animals);
+      String url = animals.get(2).getImageUrl();
 
           adapter = new ArrayAdapter<>(
               MainActivity.this, R.layout.item_animal_spinner, animals);
           adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
-          animalSelector.setAdapter(adapter);
+      if (url != null) {
+        Picasso.get().load(String.format(BuildConfig.CONTENT_FORMAT, url))
+                .into((ImageView) findViewById(R.id.image));
+      }
+      animalSelector.setAdapter(adapter);
     }
 
 
