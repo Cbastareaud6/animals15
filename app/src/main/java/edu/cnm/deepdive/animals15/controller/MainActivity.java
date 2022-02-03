@@ -10,12 +10,17 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 import edu.cnm.deepdive.animals15.BuildConfig;
 import edu.cnm.deepdive.animals15.R;
 import edu.cnm.deepdive.animals15.model.Animal;
 import edu.cnm.deepdive.animals15.service.WebServiceProxy;
+import edu.cnm.deepdive.animals15.viewmodel.MainViewModel;
 import java.io.IOException;
 import java.util.List;
 import retrofit2.Response;
@@ -47,33 +52,35 @@ public class MainActivity extends AppCompatActivity {
 
       }
     });
-    new RetrieverTask().execute();
+    MainViewModel viewModel = new ViewModelProvider(this)
+        .get(MainViewModel.class);
+    getLifecycle().addObserver(viewModel);
+    viewModel.getAnimals().observe(this, new Observer<List<Animal>>() {
+      @Override
+      public void onChanged(List<Animal> animals) {
+        ArrayAdapter<Animal> adapter = new ArrayAdapter<>(
+            MainActivity.this, R.layout.item_animal_spinner, animals);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
+        animalSelector.setAdapter(adapter);
+      }
+    });
+    viewModel.getThrowable().observe(this, new Observer<Throwable>() {
+      @Override
+      public void onChanged(Throwable throwable) {
+        Log.e(getClass().getSimpleName(),throwable.getMessage(),throwable);
+        Snackbar
+            .make(MainActivity.this.findViewById(R.id.image), throwable.getMessage(),
+                BaseTransientBottomBar.LENGTH_INDEFINITE)
+            .show();
+      }
+    }); {
+
+    }
+
 
 
   }
-  private class RetrieverTask extends AsyncTask<Void, Void, List<Animal>> {
 
-    @Override
-    protected List<Animal> doInBackground(Void... voids) {
-     return null; }
-
-    @Override
-    protected void onPostExecute(List<Animal> animals) {
-      super.onPostExecute(animals);
-      String url = animals.get(0).getImageUrl();
-
-          adapter = new ArrayAdapter<>(
-              MainActivity.this, R.layout.item_animal_spinner, animals);
-          adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
-      if (url != null) {
-        Picasso.get().load(String.format(BuildConfig.CONTENT_FORMAT, url))
-                .into((ImageView) findViewById(R.id.image));
-      }
-      animalSelector.setAdapter(adapter);
-    }
-
-
-    }
   }
 
 

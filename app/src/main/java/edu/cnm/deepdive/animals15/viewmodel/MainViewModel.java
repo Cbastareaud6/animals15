@@ -11,7 +11,8 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.OnLifecycleEvent;
 import edu.cnm.deepdive.animals15.model.Animal;
 import edu.cnm.deepdive.animals15.service.AnimalRepository;
-import io.reactivex.disposables.CompositeDisposable;
+
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,6 +23,7 @@ public class MainViewModel extends AndroidViewModel implements LifecycleObserver
   private final MutableLiveData<Throwable> throwable;
   private final CompositeDisposable pending;
 
+
   public MainViewModel(
       @NonNull @NotNull Application application) {
     super(application);
@@ -29,6 +31,7 @@ public class MainViewModel extends AndroidViewModel implements LifecycleObserver
     animals = new MutableLiveData<>();
     throwable = new MutableLiveData<>();
     pending = new CompositeDisposable();
+    load();
   }
 
   public LiveData<List<Animal>> getAnimals() {
@@ -41,13 +44,21 @@ public class MainViewModel extends AndroidViewModel implements LifecycleObserver
 
   // TODO implement method to get animals
   private void load() {
-
+    pending.add(
+        repository
+            .getAnimals()
+            .subscribe(
+                animals::postValue,
+                throwable::postValue
+            )
+    );
 
 
   }
+
   // TODO better implementation needed
   @OnLifecycleEvent(Event.ON_STOP)
-  private void clearPending(){
+  private void clearPending() {
     pending.clear();
   }
 }
